@@ -100,8 +100,39 @@ def reset_game():
         'score': 0,
         'game_over': False,
         'current_speed': INITIAL_SPEED,
-        'spawn_chance': INITIAL_SPAWN_CHANCE  # Add spawn chance to game state
+        'spawn_chance': INITIAL_SPAWN_CHANCE,  # Add spawn chance to game state
+        'show_instructions': True  # Add instructions state
     }
+
+def draw_instructions(screen, font):
+    """Draw the instructions screen"""
+    # Title
+    title_font = pygame.font.Font(None, 48)
+    title = title_font.render("Missile Protector", True, WHITE)
+    title_rect = title.get_rect(center=(WINDOW_WIDTH//2, 50))
+    screen.blit(title, title_rect)
+
+    # Instructions
+    instructions = [
+        "How to Play:",
+        "• Use LEFT and RIGHT arrow keys to move the bowl",
+        "• Catch missiles to score points",
+        "• Missing missiles will cost you points",
+        "• Reach " + str(WIN_SCORE) + " points to win",
+        "• Don't reach " + str(LOSE_SCORE) + " points or you lose!",
+        "",
+        "Game Features:",
+        "• Missiles fall faster over time",
+        "• More missiles appear as you progress",
+        "• Press SPACE to restart when game is over",
+        "",
+        "Press SPACE to Start!"
+    ]
+
+    for i, line in enumerate(instructions):
+        text = font.render(line, True, WHITE)
+        text_rect = text.get_rect(center=(WINDOW_WIDTH//2, 150 + i * 30))
+        screen.blit(text, text_rect)
 
 def main():
     clock = pygame.time.Clock()
@@ -117,56 +148,17 @@ def main():
                 pygame.quit()
                 sys.exit()
             
-            # Handle restart when game is over
-            if game_state['game_over'] and event.type == pygame.KEYDOWN:
+            # Handle key presses
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    game_state = reset_game()
-                    continue
+                    if game_state['show_instructions']:
+                        game_state['show_instructions'] = False
+                    elif game_state['game_over']:
+                        game_state = reset_game()
 
-        if not game_state['game_over']:
-            # Update stars
-            for star in stars:
-                star.update()
-
-            # Add new objects with increasing spawn chance
-            if random.random() < game_state['spawn_chance']:
-                game_state['falling_objects'].append(FallingObject())
-            
-            # Increase spawn chance
-            game_state['spawn_chance'] += SPAWN_CHANCE_INCREMENT
-
-            # Update objects
-            for obj in game_state['falling_objects'][:]:
-                obj.speed = game_state['current_speed']
-                obj.update()
-                
-                # Check collision with bowl
-                if obj.rect.colliderect(game_state['bowl'].rect):
-                    game_state['score'] += 1
-                    game_state['falling_objects'].remove(obj)
-                
-                # Check if object was missed
-                elif obj.y > WINDOW_HEIGHT:
-                    game_state['score'] -= 1
-                    game_state['falling_objects'].remove(obj)
-
-            # Update speed
-            game_state['current_speed'] += SPEED_INCREMENT * 0.01
-
-            # Check win/lose conditions
-            if game_state['score'] >= WIN_SCORE:
-                game_state['game_over'] = True
-                message = "You Win!"
-            elif game_state['score'] <= LOSE_SCORE:
-                game_state['game_over'] = True
-                message = "Game Over!"
-
-            # Bowl control
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                game_state['bowl'].move('left')
-            if keys[pygame.K_RIGHT]:
-                game_state['bowl'].move('right')
+        # Update stars
+        for star in stars:
+            star.update()
 
         # Drawing
         screen.fill(DARK_BLUE)  # Dark blue background
@@ -174,26 +166,71 @@ def main():
         # Draw stars
         for star in stars:
             star.draw()
-        
-        # Draw objects and bowl
-        for obj in game_state['falling_objects']:
-            obj.draw()
-        game_state['bowl'].draw()
 
-        # Draw score
-        score_text = font.render(f"Score: {game_state['score']}", True, WHITE)
-        screen.blit(score_text, (10, 10))
+        if game_state['show_instructions']:
+            # Draw instructions screen
+            draw_instructions(screen, font)
+        else:
+            if not game_state['game_over']:
+                # Add new objects with increasing spawn chance
+                if random.random() < game_state['spawn_chance']:
+                    game_state['falling_objects'].append(FallingObject())
+                
+                # Increase spawn chance
+                game_state['spawn_chance'] += SPAWN_CHANCE_INCREMENT
 
-        if game_state['game_over']:
-            # Draw game over/win message
-            game_over_text = font.render(message, True, WHITE)
-            text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 30))
-            screen.blit(game_over_text, text_rect)
-            
-            # Draw restart message
-            restart_text = font.render("Press SPACE to restart", True, WHITE)
-            restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 30))
-            screen.blit(restart_text, restart_rect)
+                # Update objects
+                for obj in game_state['falling_objects'][:]:
+                    obj.speed = game_state['current_speed']
+                    obj.update()
+                    
+                    # Check collision with bowl
+                    if obj.rect.colliderect(game_state['bowl'].rect):
+                        game_state['score'] += 1
+                        game_state['falling_objects'].remove(obj)
+                    
+                    # Check if object was missed
+                    elif obj.y > WINDOW_HEIGHT:
+                        game_state['score'] -= 1
+                        game_state['falling_objects'].remove(obj)
+
+                # Update speed
+                game_state['current_speed'] += SPEED_INCREMENT * 0.01
+
+                # Check win/lose conditions
+                if game_state['score'] >= WIN_SCORE:
+                    game_state['game_over'] = True
+                    message = "You Win!"
+                elif game_state['score'] <= LOSE_SCORE:
+                    game_state['game_over'] = True
+                    message = "Game Over!"
+
+                # Bowl control
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LEFT]:
+                    game_state['bowl'].move('left')
+                if keys[pygame.K_RIGHT]:
+                    game_state['bowl'].move('right')
+
+                # Draw game objects
+                for obj in game_state['falling_objects']:
+                    obj.draw()
+                game_state['bowl'].draw()
+
+                # Draw score
+                score_text = font.render(f"Score: {game_state['score']}", True, WHITE)
+                screen.blit(score_text, (10, 10))
+
+            if game_state['game_over']:
+                # Draw game over/win message
+                game_over_text = font.render(message, True, WHITE)
+                text_rect = game_over_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 30))
+                screen.blit(game_over_text, text_rect)
+                
+                # Draw restart message
+                restart_text = font.render("Press SPACE to restart", True, WHITE)
+                restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 30))
+                screen.blit(restart_text, restart_rect)
 
         pygame.display.flip()
         clock.tick(60)
