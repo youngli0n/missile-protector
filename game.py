@@ -11,7 +11,7 @@ pygame.init()
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 BOWL_WIDTH = 100
-BOWL_HEIGHT = 50
+BOWL_HEIGHT = 100  # Changed to make the shield circular
 OBJECT_SIZE = 64  # Increased from 32 to 64
 INITIAL_SPEED = 3
 INITIAL_SPEED2 = 3.5
@@ -20,7 +20,7 @@ WIN_SCORE = 20
 LOSE_SCORE = -3
 NUM_STARS = 100  # Number of stars in the background
 INITIAL_SPAWN_CHANCE = 0.0019  # 0.19% initial chance
-SPAWN_CHANCE_INCREMENT = 0.0001  # How much the spawn chance increases per frame
+SPAWN_CHANCE_INCREMENT = 0.00001  # How much the spawn chance increases per frame
 
 # Colors
 WHITE = (255, 255, 255)
@@ -33,10 +33,13 @@ DARK_BLUE = (0, 0, 40)  # Dark blue for night sky
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Catch the Objects!")
 
-# Load and scale sprite image
+# Load and scale sprite images
 SPRITE_PATH = os.path.join('images', 'missile.png')
+SHIELD_PATH = os.path.join('images', 'shield.png')
 original_sprite = pygame.image.load(SPRITE_PATH).convert_alpha()
+original_shield = pygame.image.load(SHIELD_PATH).convert_alpha()
 falling_object_sprite = pygame.transform.scale(original_sprite, (OBJECT_SIZE, OBJECT_SIZE))
+shield_sprite = pygame.transform.scale(original_shield, (BOWL_WIDTH, BOWL_HEIGHT))
 
 # Star class for background
 class Star:
@@ -91,7 +94,7 @@ class Bowl:
         self.rect.x = self.x
 
     def draw(self):
-        pygame.draw.rect(screen, BLUE, self.rect)
+        screen.blit(shield_sprite, self.rect)
 
 def reset_game():
     """Reset the game state"""
