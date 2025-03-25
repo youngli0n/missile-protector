@@ -15,9 +15,11 @@ BOWL_HEIGHT = 50
 OBJECT_SIZE = 64  # Increased from 32 to 64
 INITIAL_SPEED = 3
 SPEED_INCREMENT = 0.1
-WIN_SCORE = 10
+WIN_SCORE = 20
 LOSE_SCORE = -3
 NUM_STARS = 100  # Number of stars in the background
+INITIAL_SPAWN_CHANCE = 0.0019  # 0.19% initial chance
+SPAWN_CHANCE_INCREMENT = 0.0001  # How much the spawn chance increases per frame
 
 # Colors
 WHITE = (255, 255, 255)
@@ -31,7 +33,7 @@ screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Catch the Objects!")
 
 # Load and scale sprite image
-SPRITE_PATH = os.path.join('images', 'asteroid_sprite_32x32.png')
+SPRITE_PATH = os.path.join('images', 'missile.png')
 original_sprite = pygame.image.load(SPRITE_PATH).convert_alpha()
 falling_object_sprite = pygame.transform.scale(original_sprite, (OBJECT_SIZE, OBJECT_SIZE))
 
@@ -97,7 +99,8 @@ def reset_game():
         'falling_objects': [],
         'score': 0,
         'game_over': False,
-        'current_speed': INITIAL_SPEED
+        'current_speed': INITIAL_SPEED,
+        'spawn_chance': INITIAL_SPAWN_CHANCE  # Add spawn chance to game state
     }
 
 def main():
@@ -125,9 +128,12 @@ def main():
             for star in stars:
                 star.update()
 
-            # Add new objects
-            if random.random() < 0.02:  # 2% chance each frame to add a new object
+            # Add new objects with increasing spawn chance
+            if random.random() < game_state['spawn_chance']:
                 game_state['falling_objects'].append(FallingObject())
+            
+            # Increase spawn chance
+            game_state['spawn_chance'] += SPAWN_CHANCE_INCREMENT
 
             # Update objects
             for obj in game_state['falling_objects'][:]:
