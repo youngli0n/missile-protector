@@ -14,7 +14,7 @@ BOWL_WIDTH = 100
 BOWL_HEIGHT = 50
 OBJECT_SIZE = 64  # Increased from 32 to 64
 INITIAL_SPEED = 3
-SPEED_INCREMENT = 0.1
+INITIAL_SPEED2 = 3.5
 WIN_SCORE = 20
 LOSE_SCORE = -3
 NUM_STARS = 100  # Number of stars in the background
@@ -99,7 +99,8 @@ def reset_game():
         'falling_objects': [],
         'score': 0,
         'game_over': False,
-        'current_speed': INITIAL_SPEED,
+        'bowl_speed': INITIAL_SPEED2,
+        'falling_speed': INITIAL_SPEED,
         'spawn_chance': INITIAL_SPAWN_CHANCE,  # Add spawn chance to game state
         'show_instructions': True  # Add instructions state
     }
@@ -181,7 +182,7 @@ def main():
 
                 # Update objects
                 for obj in game_state['falling_objects'][:]:
-                    obj.speed = game_state['current_speed']
+                    obj.speed = game_state['falling_speed']
                     obj.update()
                     
                     # Check collision with bowl
@@ -195,7 +196,7 @@ def main():
                         game_state['falling_objects'].remove(obj)
 
                 # Update speed
-                game_state['current_speed'] += SPEED_INCREMENT * 0.01
+                game_state['falling_speed'] += SPEED_INCREMENT * 0.01
 
                 # Check win/lose conditions
                 if game_state['score'] >= WIN_SCORE:
