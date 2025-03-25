@@ -15,6 +15,7 @@ BOWL_HEIGHT = 50
 OBJECT_SIZE = 64  # Increased from 32 to 64
 INITIAL_SPEED = 3
 INITIAL_SPEED2 = 3.5
+SPEED_INCREMENT = 0.1  # How much the speed increases over time
 WIN_SCORE = 20
 LOSE_SCORE = -3
 NUM_STARS = 100  # Number of stars in the background
